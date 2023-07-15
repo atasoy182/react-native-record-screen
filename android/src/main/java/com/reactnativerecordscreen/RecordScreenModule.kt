@@ -16,6 +16,9 @@ import com.hbisoft.hbrecorder.HBRecorderListener
 import java.io.File
 import java.io.IOException
 import kotlin.math.ceil
+import com.facebook.react.bridge.WritableMap
+import com.facebook.react.bridge.Arguments
+import com.facebook.react.modules.core.DeviceEventManagerModule
 
 
 class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext), HBRecorderListener {
@@ -62,6 +65,12 @@ class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBa
       }
       startPromise!!.resolve("started");
     }
+  }
+
+  private fun sendEvent(eventName: String, params: WritableMap?) {
+    reactApplicationContext
+      .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+      .emit(eventName, params)
   }
 
   override fun initialize() {
@@ -147,15 +156,13 @@ class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBa
 
   override fun HBRecorderOnComplete() {
     println("HBRecorderOnComplete")
-    if (stopPromise != null) {
-      val uri = hbRecorder!!.filePath;
-      val response = WritableNativeMap();
-      val result = WritableNativeMap();
-      result.putString("outputURL", uri);
-      response.putString("status", "success");
-      response.putMap("result", result);
-      stopPromise!!.resolve(response);
-    }
+    val uri = hbRecorder!!.filePath;
+    val response = WritableNativeMap();
+    val result = WritableNativeMap();
+    result.putString("outputURL", uri);
+    response.putString("status", "success");
+    response.putMap("result", result);
+    sendEvent( "RecordCompleted", response);
   }
 
   override fun HBRecorderOnError(errorCode: Int, reason: String?) {
