@@ -56,7 +56,9 @@ class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBa
       println(AppCompatActivity.RESULT_OK)
       if (requestCode == SCREEN_RECORD_REQUEST_CODE) {
         if (resultCode == AppCompatActivity.RESULT_OK) {
-          hbRecorder!!.startScreenRecording(intent, resultCode, Activity());
+          Handler().postDelayed({
+            hbRecorder!!.startScreenRecording(intent, resultCode, Activity());
+          }, 3500)
         } else {
           startPromise!!.resolve("permission_error");
         }
